@@ -3,120 +3,324 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL Player | Assets-20250918T001118Z-1-001</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Rounding — Pegasus</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
-  </head>
-  <body>
-    <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
-        </div>
-      </div>
-      <div id="unity-warning"> </div>
-      <div id="unity-footer">
-        <div id="unity-webgl-logo"></div>
-        <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">Assets-20250918T001118Z-1-001</div>
-      </div>
-    </div>
-    <script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-      var container = document.querySelector("#unity-container");
-      var canvas = document.querySelector("#unity-canvas");
-      var loadingBar = document.querySelector("#unity-loading-bar");
-      var progressBarFull = document.querySelector("#unity-progress-bar-full");
-      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
-      var warningBanner = document.querySelector("#unity-warning");
-
-      // Shows a temporary message banner/ribbon for a few seconds, or
-      // a permanent error message on top of the canvas if type=='error'.
-      // If type=='warning', a yellow highlight color is used.
-      // Modify or remove this function to customize the visually presented
-      // way that non-critical warnings and error messages are presented to the
-      // user.
-      function unityShowBanner(msg, type) {
-        function updateBannerVisibility() {
-          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-        }
-        var div = document.createElement('div');
-        div.innerHTML = msg;
-        warningBanner.appendChild(div);
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
-        else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-          }, 5000);
-        }
-        updateBannerVisibility();
+      body {
+        background: #0a0a12;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        font-family: 'Outfit', sans-serif;
+        overflow: hidden;
       }
 
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/Rounding.loader.js";
-      var config = {
-        dataUrl: buildUrl + "/Rounding.data.br",
-        frameworkUrl: buildUrl + "/Rounding.framework.js.br",
-        codeUrl: buildUrl + "/Rounding.wasm.br",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "Assets-20250918T001118Z-1-001",
-        productVersion: "1.0",
-        showBanner: unityShowBanner,
-      };
+      /* Animated background gradient */
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: 
+          radial-gradient(ellipse at 20% 50%, rgba(88, 28, 135, 0.15) 0%, transparent 60%),
+          radial-gradient(ellipse at 80% 20%, rgba(15, 118, 196, 0.12) 0%, transparent 50%),
+          radial-gradient(ellipse at 50% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
+        animation: bgPulse 8s ease-in-out infinite alternate;
+        z-index: 0;
+      }
 
-      // By default Unity keeps WebGL canvas render target size matched with
-      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
-      // Set this to false if you want to decouple this synchronization from
-      // happening inside the engine, and you would instead like to size up
-      // the canvas DOM size and WebGL render target sizes yourself.
-      // config.matchWebGLToCanvasSize = false;
+      @keyframes bgPulse {
+        0% { opacity: 0.6; transform: scale(1); }
+        100% { opacity: 1; transform: scale(1.05); }
+      }
 
+      #unity-canvas {
+        position: relative;
+        z-index: 1;
+        background: #111;
+        border-radius: 12px;
+        box-shadow: 0 0 60px rgba(139, 92, 246, 0.15), 0 8px 32px rgba(0, 0, 0, 0.5);
+      }
+
+      /* Loading overlay */
+      #loading-overlay {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #0a0a12;
+        z-index: 100;
+        transition: opacity 0.6s ease, visibility 0.6s ease;
+      }
+
+      #loading-overlay.hidden {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      /* Pegasus logo / brand */
+      .logo-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 48px;
+        animation: logoEntry 1s ease-out;
+      }
+
+      @keyframes logoEntry {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+
+      .logo-icon {
+        width: 72px;
+        height: 72px;
+        margin-bottom: 16px;
+        position: relative;
+      }
+
+      /* Pegasus wing SVG icon */
+      .logo-icon svg {
+        width: 100%;
+        height: 100%;
+        filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.5));
+        animation: iconFloat 3s ease-in-out infinite;
+      }
+
+      @keyframes iconFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+      }
+
+      .logo-text {
+        font-size: 36px;
+        font-weight: 700;
+        letter-spacing: 6px;
+        text-transform: uppercase;
+        background: linear-gradient(135deg, #c084fc, #818cf8, #67e8f9);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .logo-subtitle {
+        font-size: 13px;
+        font-weight: 300;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.35);
+        margin-top: 8px;
+      }
+
+      /* Game title */
+      .game-title {
+        font-size: 16px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.6);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 32px;
+        animation: fadeIn 1s ease-out 0.3s both;
+      }
+
+      @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+      }
+
+      /* Progress bar */
+      .progress-wrapper {
+        width: 320px;
+        animation: fadeIn 1s ease-out 0.5s both;
+      }
+
+      .progress-track {
+        width: 100%;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 3px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .progress-fill {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, #8b5cf6, #6366f1, #67e8f9);
+        border-radius: 3px;
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        box-shadow: 0 0 16px rgba(139, 92, 246, 0.5);
+      }
+
+      /* Shimmer effect on progress bar */
+      .progress-fill::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        animation: shimmer 1.5s infinite;
+      }
+
+      @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+      }
+
+      .progress-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 12px;
+      }
+
+      .progress-label {
+        font-size: 12px;
+        font-weight: 300;
+        color: rgba(255, 255, 255, 0.4);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+
+      .progress-percent {
+        font-size: 14px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.7);
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* Particle dots */
+      .particles {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 99;
+        overflow: hidden;
+      }
+
+      .particle {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: rgba(168, 85, 247, 0.4);
+        border-radius: 50%;
+        animation: particleFloat linear infinite;
+      }
+
+      @keyframes particleFloat {
+        0% { transform: translateY(100vh) scale(0); opacity: 0; }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+
+    <div id="loading-overlay">
+      <div class="particles" id="particles"></div>
+
+      <div class="logo-container">
+        <div class="logo-icon">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50 8C50 8 25 20 20 45C15 70 35 90 50 92C65 90 85 70 80 45C75 20 50 8 50 8Z" 
+                  fill="url(#wingGrad)" opacity="0.15"/>
+            <path d="M50 15C50 15 30 25 26 45C22 65 38 82 50 84C62 82 78 65 74 45C70 25 50 15 50 15Z" 
+                  stroke="url(#wingGrad)" stroke-width="1.5" fill="none"/>
+            <path d="M50 28L44 48L50 44L56 48L50 28Z" fill="url(#wingGrad)"/>
+            <path d="M38 50C38 50 30 38 22 42C14 46 18 58 26 56C34 54 38 50 38 50Z" 
+                  stroke="url(#wingGrad)" stroke-width="1.2" fill="url(#wingGrad)" opacity="0.3"/>
+            <path d="M62 50C62 50 70 38 78 42C86 46 82 58 74 56C66 54 62 50 62 50Z" 
+                  stroke="url(#wingGrad)" stroke-width="1.2" fill="url(#wingGrad)" opacity="0.3"/>
+            <circle cx="50" cy="52" r="4" fill="url(#wingGrad)" opacity="0.8"/>
+            <defs>
+              <linearGradient id="wingGrad" x1="20" y1="20" x2="80" y2="80">
+                <stop offset="0%" stop-color="#c084fc"/>
+                <stop offset="50%" stop-color="#818cf8"/>
+                <stop offset="100%" stop-color="#67e8f9"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="logo-text">Pegasus</div>
+        <div class="logo-subtitle">Play Studio</div>
+      </div>
+
+      <div class="game-title">Rounding</div>
+
+      <div class="progress-wrapper">
+        <div class="progress-track">
+          <div class="progress-fill" id="loading-progress"></div>
+        </div>
+        <div class="progress-info">
+          <span class="progress-label">Loading</span>
+          <span class="progress-percent" id="loading-text">0%</span>
+        </div>
+      </div>
+    </div>
+
+    <script src="Build/Rounding.loader.js"></script>
+    <script>
+      // Generate floating particles
+      (function() {
+        var container = document.getElementById('particles');
+        for (var i = 0; i < 20; i++) {
+          var p = document.createElement('div');
+          p.className = 'particle';
+          p.style.left = Math.random() * 100 + '%';
+          p.style.animationDuration = (4 + Math.random() * 6) + 's';
+          p.style.animationDelay = Math.random() * 5 + 's';
+          p.style.width = p.style.height = (1 + Math.random() * 3) + 'px';
+          container.appendChild(p);
+        }
+      })();
+
+      var canvas = document.querySelector("#unity-canvas");
+      var overlay = document.querySelector("#loading-overlay");
+      var progressFill = document.querySelector("#loading-progress");
+      var loadingText = document.querySelector("#loading-text");
+
+      // Responsive canvas sizing
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
-
         var meta = document.createElement('meta');
         meta.name = 'viewport';
         meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
         document.getElementsByTagName('head')[0].appendChild(meta);
-        container.className = "unity-mobile";
-        canvas.className = "unity-mobile";
-
-        // To lower canvas resolution on mobile devices to gain some
-        // performance, uncomment the following line:
-        // config.devicePixelRatio = 1;
-
-
+        canvas.style.width = '100vw';
+        canvas.style.height = '100vh';
+        canvas.style.borderRadius = '0';
       } else {
-        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-
         canvas.style.width = "960px";
         canvas.style.height = "600px";
       }
 
-      loadingBar.style.display = "block";
-
-      var script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          progressBarFull.style.width = 100 * progress + "%";
-              }).then((unityInstance) => {
-                loadingBar.style.display = "none";
-                fullscreenButton.onclick = () => {
-                  unityInstance.SetFullscreen(1);
-                };
-              }).catch((message) => {
-                alert(message);
-              });
-            };
-
-      document.body.appendChild(script);
-
+      createUnityInstance(canvas, {
+        dataUrl: "Build/Rounding.data.br",
+        frameworkUrl: "Build/Rounding.framework.js.br",
+        codeUrl: "Build/Rounding.wasm.br",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Play Studio",
+        productName: "Rounding",
+        productVersion: "1.0",
+      }, (progress) => {
+        var percentage = Math.round(progress * 100);
+        progressFill.style.width = percentage + "%";
+        loadingText.innerText = percentage + "%";
+      }).then((unityInstance) => {
+        overlay.classList.add('hidden');
+        setTimeout(() => { overlay.remove(); }, 700);
+      }).catch((message) => {
+        alert(message);
+      });
     </script>
   </body>
 </html>
